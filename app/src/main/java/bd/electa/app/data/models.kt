@@ -15,3 +15,9 @@ data class TokenResponse(
     @SerializedName("token_type")
     val tokenType: String
 )
+
+// Data class for the /ekyc/initiate response body
+data class EkycInitiateResponse(
+    @SerializedName("redirect_url")
+    val redirectUrl: String
+)

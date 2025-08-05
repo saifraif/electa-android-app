@@ -1,5 +1,6 @@
 package bd.electa.app
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import android.widget.Button
@@ -10,13 +11,18 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import bd.electa.app.data.AuthRequest
 import bd.electa.app.networking.RetrofitClient
+import bd.electa.app.utils.SessionManager
 import kotlinx.coroutines.launch
 
 class MainActivity : AppCompatActivity() {
 
+    private lateinit var sessionManager: SessionManager
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+        sessionManager = SessionManager(applicationContext)
 
         val etMobileNumber = findViewById<EditText>(R.id.etMobileNumber)
         val etPassword = findViewById<EditText>(R.id.etPassword)
@@ -24,6 +30,12 @@ class MainActivity : AppCompatActivity() {
         val btnRequestOtp = findViewById<Button>(R.id.btnRequestOtp)
         val btnVerify = findViewById<Button>(R.id.btnVerify)
         val progressBar = findViewById<ProgressBar>(R.id.progressBar)
+        val btnGoToEkyc = findViewById<Button>(R.id.btnGoToEkyc)
+
+        btnGoToEkyc.setOnClickListener {
+            val intent = Intent(this, EkycActivity::class.java)
+            startActivity(intent)
+        }
 
         btnRequestOtp.setOnClickListener {
             val mobile = etMobileNumber.text.toString()
@@ -67,8 +79,15 @@ class MainActivity : AppCompatActivity() {
                     val response = RetrofitClient.instance.verifyOtp(AuthRequest(mobile, password), otp)
                     if (response.isSuccessful) {
                         val token = response.body()?.accessToken
-                        Toast.makeText(this@MainActivity, "Success! Token received.", Toast.LENGTH_LONG).show()
-                        // In a real app, we would now save this token securely and navigate to the home screen.
+                        if (token != null) {
+                            // HERE IS THE FIX: We now use the 'token' variable
+                            sessionManager.saveAuthToken(token)
+                            Toast.makeText(this@MainActivity, "Success! Token has been securely saved.", Toast.LENGTH_LONG).show()
+                            // Now that registration is done, let's go to the e-KYC screen
+                            val intent = Intent(this@MainActivity, EkycActivity::class.java)
+                            startActivity(intent)
+                            finish() // Close the registration screen
+                        }
                     } else {
                         Toast.makeText(this@MainActivity, "Verification Error: ${response.code()}", Toast.LENGTH_SHORT).show()
                     }

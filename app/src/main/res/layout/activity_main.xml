@@ -11,7 +11,8 @@
         android:id="@+id/etMobileNumber"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Mobile Number (e.g., +880...)"
+        android:autofillHints="phone"
+        android:hint="@string/mobile_number_e_g_880"
         android:inputType="phone" />
 
     <EditText
@@ -19,7 +20,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
-        android:hint="Password"
+        android:autofillHints="password"
+        android:hint="@string/password"
         android:inputType="textPassword" />
 
     <Button
@@ -27,14 +29,15 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
-        android:text="Request OTP" />
+        android:text="@string/request_otp" />
 
     <EditText
         android:id="@+id/etOtp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
-        android:hint="Enter 6-digit OTP"
+        android:autofillHints="oneTimeCode"
+        android:hint="@string/enter_6_digit_otp"
         android:inputType="number"
         android:maxLength="6" />
 
@@ -43,7 +46,15 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
-        android:text="Verify &amp; Register" />
+        android:text="@string/verify_amp_register" />
+
+    <Button
+        android:id="@+id/btnGoToEkyc"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
+        style="?attr/materialButtonOutlinedStyle"
+        android:text="@string/or_try_instant_e_kyc_verification" />
 
     <ProgressBar
         android:id="@+id/progressBar"
