@@ -9,4 +9,7 @@
     <string name="enter_6_digit_otp">Enter 6-digit OTP</string>
     <string name="verify_amp_register"><![CDATA[Verify & Register]]></string>
     <string name="or_try_instant_e_kyc_verification">Or, Try Instant e-KYC Verification</string>
+    <string name="july_charter_compliance">July Charter Compliance</string>
+    <string name="clause_1_0_anti_corruption">Clause 1.0 (Anti-Corruption)</string>
+    <string name="anti_corruption_pledge">Anti-Corruption Pledge</string>
 </resources>

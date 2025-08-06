@@ -21,3 +21,14 @@ data class EkycInitiateResponse(
     @SerializedName("redirect_url")
     val redirectUrl: String
 )
+
+data class CharterClause(
+    val id: String,
+    @SerializedName("version_id")
+    val versionId: String,
+    @SerializedName("clause_number")
+    val clauseNumber: String?,
+    val title: String?,
+    @SerializedName("clause_group")
+    val clauseGroup: String?
+)

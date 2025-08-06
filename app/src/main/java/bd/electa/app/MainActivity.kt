@@ -32,8 +32,9 @@ class MainActivity : AppCompatActivity() {
         val progressBar = findViewById<ProgressBar>(R.id.progressBar)
         val btnGoToEkyc = findViewById<Button>(R.id.btnGoToEkyc)
 
+        // This button will now launch our new CharterActivity for testing
         btnGoToEkyc.setOnClickListener {
-            val intent = Intent(this, EkycActivity::class.java)
+            val intent = Intent(this, CharterActivity::class.java)
             startActivity(intent)
         }
 
@@ -80,13 +81,11 @@ class MainActivity : AppCompatActivity() {
                     if (response.isSuccessful) {
                         val token = response.body()?.accessToken
                         if (token != null) {
-                            // HERE IS THE FIX: We now use the 'token' variable
                             sessionManager.saveAuthToken(token)
                             Toast.makeText(this@MainActivity, "Success! Token has been securely saved.", Toast.LENGTH_LONG).show()
-                            // Now that registration is done, let's go to the e-KYC screen
-                            val intent = Intent(this@MainActivity, EkycActivity::class.java)
+                            val intent = Intent(this@MainActivity, CharterActivity::class.java)
                             startActivity(intent)
-                            finish() // Close the registration screen
+                            finish()
                         }
                     } else {
                         Toast.makeText(this@MainActivity, "Verification Error: ${response.code()}", Toast.LENGTH_SHORT).show()

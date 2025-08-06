@@ -15,6 +15,9 @@
         android:theme="@style/Theme.Electaandroidapp"
         android:usesCleartextTraffic="true">
         <activity
+            android:name=".CharterActivity"
+            android:exported="false" />
+        <activity
             android:name=".EkycActivity"
             android:exported="false" />
         <activity
