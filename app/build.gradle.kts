@@ -4,13 +4,13 @@ plugins {
 }
 
 android {
-    namespace = "bd.electa.app"
-    compileSdk = 36
+    namespace = "com.electa"
+    compileSdk = 34
 
     defaultConfig {
-        applicationId = "bd.electa.app"
+        applicationId = "com.electa"
         minSdk = 24
-        targetSdk = 36
+        targetSdk = 34
         versionCode = 1
         versionName = "1.0"
 
@@ -18,12 +18,18 @@ android {
     }
 
     buildTypes {
+        debug {
+            isMinifyEnabled = false
+            // Defines the BASE_URL for testing
+            buildConfigField("String", "BASE_URL", "\"http://192.168.0.101:8080/\"")
+        }
         release {
             isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            buildConfigField("String", "BASE_URL", "\"https://api.prod.electa.com/\"")
         }
     }
     compileOptions {
@@ -36,6 +42,7 @@ android {
     // Add this block to enable View Binding, which makes UI code cleaner
     buildFeatures {
         viewBinding = true
+        buildConfig = true
     }
 }
 
@@ -52,6 +59,9 @@ dependencies {
     // For making API calls (Networking)
     implementation("com.squareup.retrofit2:retrofit:2.9.0")
     implementation("com.squareup.retrofit2:converter-gson:2.9.0")
+
+    implementation("com.squareup.okhttp3:okhttp:4.12.0")
+    implementation("com.google.code.gson:gson:2.10.1")
 
     // For handling asynchronous operations
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.1")
