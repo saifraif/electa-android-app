@@ -1,6 +1,7 @@
 package bd.electa.app
 
 import android.os.Bundle
+import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
@@ -22,11 +23,14 @@ class CharterActivity : AppCompatActivity() {
     }
 
     private fun fetchCharterClauses() {
+        // --- ADJUSTMENT IMPLEMENTED ---
+        binding.progressBarCharter.visibility = View.VISIBLE // 1. Show progress bar
+        binding.rvCharterClauses.visibility = View.GONE     // 2. Hide the list
+        // --- END ADJUSTMENT ---
+
         lifecycleScope.launch {
             try {
-                // NOTE: The backend doesn't have this public endpoint yet.
-                // This code will compile, but will fail at runtime with a 404 error.
-                // This is expected and completes the UI part of the sprint.
+                // This will fail with 404, which is expected for now
                 val response = RetrofitClient.instance.getCharterClauses()
                 if (response.isSuccessful) {
                     val clauses = response.body()
@@ -40,6 +44,11 @@ class CharterActivity : AppCompatActivity() {
                 }
             } catch (e: Exception) {
                 Toast.makeText(this@CharterActivity, "Network Exception: ${e.message}", Toast.LENGTH_SHORT).show()
+            } finally {
+                // --- ADJUSTMENT IMPLEMENTED ---
+                binding.progressBarCharter.visibility = View.GONE // 3. Hide progress bar
+                binding.rvCharterClauses.visibility = View.VISIBLE    // 4. Show the list
+                // --- END ADJUSTMENT ---
             }
         }
     }
