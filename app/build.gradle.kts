@@ -1,16 +1,17 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
+    id("kotlin-kapt")
 }
 
 android {
-    namespace = "com.electa"
-    compileSdk = 34
+    namespace = "bd.electa.app"
+    compileSdk = 36
 
     defaultConfig {
-        applicationId = "com.electa"
+        applicationId = "bd.electa.app"
         minSdk = 24
-        targetSdk = 34
+        targetSdk = 36
         versionCode = 1
         versionName = "1.0"
 
@@ -20,7 +21,6 @@ android {
     buildTypes {
         debug {
             isMinifyEnabled = false
-            // Defines the BASE_URL for testing
             buildConfigField("String", "BASE_URL", "\"http://192.168.0.101:8080/\"")
         }
         release {
@@ -32,49 +32,51 @@ android {
             buildConfigField("String", "BASE_URL", "\"https://api.prod.electa.com/\"")
         }
     }
+
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
-    kotlinOptions {
-        jvmTarget = "11"
+
+    // New DSL (replaces deprecated kotlinOptions.jvmTarget)
+    kotlin {
+        compilerOptions {
+            jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
+        }
     }
-    // Add this block to enable View Binding, which makes UI code cleaner
+
     buildFeatures {
         viewBinding = true
+        dataBinding = true
         buildConfig = true
     }
 }
-
 dependencies {
-
-    // Default Android Libraries
+    // AndroidX core UI
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
     implementation(libs.androidx.activity)
+    implementation(libs.androidx.activity.ktx)
     implementation(libs.androidx.constraintlayout)
 
-    // Dependencies for ELECTA Project (Added)
-    // For making API calls (Networking)
-    implementation("com.squareup.retrofit2:retrofit:2.9.0")
-    implementation("com.squareup.retrofit2:converter-gson:2.9.0")
+    // Lifecycle
+    implementation(libs.androidx.lifecycle.viewmodel.ktx)
+    implementation(libs.androidx.lifecycle.livedata.ktx)
 
-    implementation("com.squareup.okhttp3:okhttp:4.12.0")
-    implementation("com.google.code.gson:gson:2.10.1")
+    // Coroutines
+    implementation(libs.kotlinx.coroutines.android)
 
-    // For handling asynchronous operations
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.1")
+    // Networking / JSON
+    implementation(libs.okhttp)
+    implementation(libs.retrofit)
+    implementation(libs.retrofit.converter.gson)
+    implementation(libs.gson)
 
-    // For ViewModel and LiveData (Android Architecture Components)
-    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.2")
-    implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.6.2")
-    implementation("androidx.activity:activity-ktx:1.8.0")
+    // Encrypted storage
+    implementation(libs.androidx.security.crypto)
 
-    // For securely storing the JWT token
-    implementation("androidx.security:security-crypto:1.0.0")
-
-    // Testing Libraries
+    // Tests
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

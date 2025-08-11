@@ -1,4 +1,4 @@
-package com.electa.auth
+package bd.electa.app.auth
 
 import okhttp3.*
 import okhttp3.MediaType.Companion.toMediaType

@@ -1,9 +1,9 @@
 package bd.electa.app.networking
 
-import bd.electa.app.data.AuthRequest
-import bd.electa.app.data.EkycInitiateResponse
-import bd.electa.app.data.TokenResponse
-import bd.electa.app.data.CharterClause // Corrected import from 'data' package
+import bd.electa.app.models.AuthRequest
+import bd.electa.app.models.EkycInitiateResponse
+import bd.electa.app.models.TokenResponse
+import bd.electa.app.models.CharterClause
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.GET
@@ -16,7 +16,10 @@ interface ApiService {
     suspend fun requestOtp(@Body authRequest: AuthRequest): Response<Unit>
 
     @POST("/api/v1/auth/register/verify-otp")
-    suspend fun verifyOtp(@Body authRequest: AuthRequest, @Query("otp") otp: Int): Response<TokenResponse>
+    suspend fun verifyOtp(
+        @Body authRequest: AuthRequest,
+        @Query("otp") otp: Int
+    ): Response<TokenResponse>
 
     @POST("/api/v1/ekyc/initiate")
     suspend fun initiateEkycFlow(): Response<EkycInitiateResponse>

@@ -1,11 +1,11 @@
 package bd.electa.app
 
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.net.toUri
 import androidx.lifecycle.lifecycleScope
 import bd.electa.app.databinding.ActivityEkycBinding
 import bd.electa.app.networking.RetrofitClient
@@ -20,35 +20,35 @@ class EkycActivity : AppCompatActivity() {
         binding = ActivityEkycBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        binding.btnStartEkyc.setOnClickListener {
-            initiateEkyc()
+        binding.btnStartEkyc.setOnClickListener { startEkyc() }
+    }
+
+    private fun startEkyc() {
+        setLoading(true)
+        lifecycleScope.launch {
+            try {
+                val res = RetrofitClient.api.initiateEkycFlow()
+                if (res.isSuccessful) {
+                    val url = res.body()?.redirectUrl
+                    if (!url.isNullOrBlank()) {
+                        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
+                        startActivity(intent)
+                    } else {
+                        Toast.makeText(this@EkycActivity, "No redirect URL", Toast.LENGTH_SHORT).show()
+                    }
+                } else {
+                    Toast.makeText(this@EkycActivity, "eKYC failed: ${res.code()}", Toast.LENGTH_SHORT).show()
+                }
+            } catch (e: Exception) {
+                Toast.makeText(this@EkycActivity, "Error: ${e.localizedMessage}", Toast.LENGTH_LONG).show()
+            } finally {
+                setLoading(false)
+            }
         }
     }
 
-    private fun initiateEkyc() {
-        binding.progressBarEkyc.visibility = View.VISIBLE
-        lifecycleScope.launch {
-            try {
-                val response = RetrofitClient.instance.initiateEkycFlow()
-                if (response.isSuccessful) {
-                    val redirectUrl = response.body()?.redirectUrl
-                    Toast.makeText(this@EkycActivity, "Redirecting to mock bank...", Toast.LENGTH_LONG).show()
-
-                    if (!redirectUrl.isNullOrEmpty()) {
-                        // In a real app, this would open a secure in-app browser (Chrome Custom Tab).
-                        // For this test, we'll just open the standard browser.
-                        val browserIntent = Intent(Intent.ACTION_VIEW, redirectUrl.toUri())
-                        startActivity(browserIntent)
-                    }
-
-                } else {
-                    Toast.makeText(this@EkycActivity, "Error: ${response.code()}", Toast.LENGTH_SHORT).show()
-                }
-            } catch (e: Exception) {
-                Toast.makeText(this@EkycActivity, "Network Exception: ${e.message}", Toast.LENGTH_SHORT).show()
-            } finally {
-                binding.progressBarEkyc.visibility = View.GONE
-            }
-        }
+    private fun setLoading(loading: Boolean) {
+        binding.progressBarEkyc.visibility = if (loading) View.VISIBLE else View.GONE
+        binding.btnStartEkyc.isEnabled = !loading
     }
 }

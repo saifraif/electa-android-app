@@ -1,3 +1,3 @@
-package com.electa.models
+package bd.electa.app.models
 
 data class LoginRequest(val email: String, val password: String)
