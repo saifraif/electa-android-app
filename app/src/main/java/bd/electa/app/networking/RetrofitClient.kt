@@ -1,45 +1,43 @@
 package bd.electa.app.networking
 
+import bd.electa.app.BuildConfig
+import bd.electa.app.utils.TokenManager
+import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
-import retrofit2.converter.moshi.MoshiConverterFactory
-import java.util.concurrent.TimeUnit
+import retrofit2.converter.gson.GsonConverterFactory
 
 object RetrofitClient {
 
-    // If you set BASE_URL in BuildConfig, great. Otherwise, hardcode it here:
-    private const val FALLBACK_BASE_URL = "https://example.com"
+    private val authHeaderInterceptor = Interceptor { chain ->
+        val original = chain.request()
+        val builder = original.newBuilder()
 
-    private val logging by lazy {
-        HttpLoggingInterceptor().apply {
-            level = HttpLoggingInterceptor.Level.BODY
-        }
-    }
-
-    private val okHttp by lazy {
-        OkHttpClient.Builder()
-            .addInterceptor(logging)
-            .connectTimeout(30, TimeUnit.SECONDS)
-            .readTimeout(30, TimeUnit.SECONDS)
-            .build()
-    }
-
-    private val retrofit by lazy {
-        val baseUrl = try {
-            // Use BuildConfig if generated
-            val field = Class.forName("bd.electa.app.BuildConfig").getField("BASE_URL")
-            (field.get(null) as? String)?.takeIf { it.isNotBlank() } ?: FALLBACK_BASE_URL
-        } catch (_: Throwable) {
-            FALLBACK_BASE_URL
+        TokenManager.getAccessToken()?.let { token ->
+            builder.addHeader("Authorization", "Bearer $token")
         }
 
-        Retrofit.Builder()
-            .baseUrl(baseUrl)
-            .client(okHttp)
-            .addConverterFactory(MoshiConverterFactory.create())
-            .build()
+        chain.proceed(builder.build())
     }
 
-    val api: ApiService by lazy { retrofit.create(ApiService::class.java) }
+    private val logging = HttpLoggingInterceptor().apply {
+        level = if (BuildConfig.DEBUG)
+            HttpLoggingInterceptor.Level.BODY
+        else
+            HttpLoggingInterceptor.Level.NONE
+    }
+
+    private val okHttp = OkHttpClient.Builder()
+        .addInterceptor(authHeaderInterceptor)
+        .addInterceptor(logging)
+        .build()
+
+    private val retrofit: Retrofit = Retrofit.Builder()
+        .baseUrl(BuildConfig.BASE_URL)
+        .client(okHttp)
+        .addConverterFactory(GsonConverterFactory.create())
+        .build()
+
+    val instance: ApiService by lazy { retrofit.create(ApiService::class.java) }
 }

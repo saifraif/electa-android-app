@@ -8,7 +8,6 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import bd.electa.app.adapters.CharterClauseAdapter
 import bd.electa.app.databinding.ActivityCharterBinding
-import bd.electa.app.models.CharterClause
 import bd.electa.app.networking.RetrofitClient
 import kotlinx.coroutines.launch
 
@@ -22,35 +21,30 @@ class CharterActivity : AppCompatActivity() {
         binding = ActivityCharterBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        setupRecycler()
-        fetchClauses()
-    }
-
-    private fun setupRecycler() {
-        adapter = CharterClauseAdapter(onItemClick = { /* handle click if needed */ })
+        adapter = CharterClauseAdapter(emptyList())
         binding.rvCharterClauses.layoutManager = LinearLayoutManager(this)
         binding.rvCharterClauses.adapter = adapter
-        binding.rvCharterClauses.setHasFixedSize(true)
+
+        fetchClauses()
     }
 
     private fun fetchClauses() {
         showLoading(true)
         binding.tvEmptyState.visibility = View.GONE
-
         lifecycleScope.launch {
             try {
-                val response = RetrofitClient.api.getCharterClauses()
-                if (response.isSuccessful) {
-                    val list: List<CharterClause> = response.body().orEmpty()
+                val resp = RetrofitClient.instance.getCharterClauses()
+                if (resp.isSuccessful) {
+                    val list = resp.body().orEmpty()
                     if (list.isNotEmpty()) {
-                        adapter.submitList(list)
+                        adapter.updateData(list)
                         binding.rvCharterClauses.visibility = View.VISIBLE
                         binding.tvEmptyState.visibility = View.GONE
                     } else {
-                        showEmptyState()
+                        showEmpty()
                     }
                 } else {
-                    showError("Server error: ${response.code()}")
+                    showError("Server error: ${resp.code()}")
                 }
             } catch (e: Exception) {
                 showError("Network error: ${e.localizedMessage}")
@@ -64,14 +58,14 @@ class CharterActivity : AppCompatActivity() {
         binding.progressBarCharter.visibility = if (loading) View.VISIBLE else View.GONE
     }
 
-    private fun showError(message: String) {
+    private fun showEmpty() {
+        binding.rvCharterClauses.visibility = View.GONE
         binding.tvEmptyState.visibility = View.VISIBLE
-        binding.tvEmptyState.text = message
-        Toast.makeText(this, message, Toast.LENGTH_LONG).show()
     }
 
-    private fun showEmptyState() {
-        binding.tvEmptyState.visibility = View.VISIBLE
-        binding.rvCharterClauses.visibility = View.GONE
+    private fun showError(msg: String) {
+        showEmpty()
+        binding.tvEmptyState.text = msg
+        Toast.makeText(this, msg, Toast.LENGTH_LONG).show()
     }
 }

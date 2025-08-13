@@ -1,13 +1,14 @@
 package bd.electa.app.utils
 
 import android.content.Context
+import bd.electa.app.utils.TokenManager
 
-class SessionManager(context: Context) {
-    private val tokenManager = TokenManager(context.applicationContext)
 
-    fun hasValidToken(): Boolean = !tokenManager.getAccessToken().isNullOrBlank()
-
-    fun setToken(token: String) = tokenManager.saveAccessToken(token)
-
-    fun clear() = tokenManager.clear()
+class SessionManager(private val context: Context) {
+    fun saveAccessToken(token: String?) = TokenManager.saveAccessToken(token)
+    fun saveRefreshToken(token: String?) = TokenManager.saveRefreshToken(token)
+    fun getAccessToken(): String? = TokenManager.getAccessToken()
+    fun getRefreshToken(): String? = TokenManager.getRefreshToken()
+    fun hasValidToken(): Boolean = TokenManager.hasValidToken()
+    fun clear() = TokenManager.clear()
 }

@@ -63,5 +63,28 @@
         android:layout_gravity="center"
         android:layout_marginTop="16dp"
         android:visibility="gone" />
+    <Button
+        android:id="@+id/btnOpenCharter"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Open Charter" />
+
+    <Button
+        android:id="@+id/btnOpenEkyc"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Start eKYC" />
+
+    <Button
+        android:id="@+id/btnOpenLogin"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Go to Login" />
+
+    <Button
+        android:id="@+id/btnLogout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Logout" />
 
 </LinearLayout>

@@ -1,11 +1,11 @@
 package bd.electa.app
 
-import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
-import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.browser.customtabs.CustomTabsIntent
+import androidx.core.view.isVisible
 import androidx.lifecycle.lifecycleScope
 import bd.electa.app.databinding.ActivityEkycBinding
 import bd.electa.app.networking.RetrofitClient
@@ -25,30 +25,41 @@ class EkycActivity : AppCompatActivity() {
 
     private fun startEkyc() {
         setLoading(true)
+
         lifecycleScope.launch {
             try {
-                val res = RetrofitClient.api.initiateEkycFlow()
-                if (res.isSuccessful) {
-                    val url = res.body()?.redirectUrl
-                    if (!url.isNullOrBlank()) {
-                        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
-                        startActivity(intent)
+                val resp = RetrofitClient.instance.initiateEkycFlow()
+
+                if (resp.isSuccessful) {
+                    val url = resp.body()?.redirectUrl?.takeIf { !it.isNullOrBlank() }
+                    if (url != null) {
+                        openInCustomTabs(url)
                     } else {
-                        Toast.makeText(this@EkycActivity, "No redirect URL", Toast.LENGTH_SHORT).show()
+                        showToast("Invalid redirect URL")
                     }
                 } else {
-                    Toast.makeText(this@EkycActivity, "eKYC failed: ${res.code()}", Toast.LENGTH_SHORT).show()
+                    showToast("Failed: ${resp.code()} ${resp.message()}")
                 }
             } catch (e: Exception) {
-                Toast.makeText(this@EkycActivity, "Error: ${e.localizedMessage}", Toast.LENGTH_LONG).show()
+                showToast("Network error: ${e.localizedMessage}")
             } finally {
                 setLoading(false)
             }
         }
     }
 
+    private fun openInCustomTabs(url: String) {
+        CustomTabsIntent.Builder()
+            .build()
+            .launchUrl(this, Uri.parse(url))
+    }
+
     private fun setLoading(loading: Boolean) {
-        binding.progressBarEkyc.visibility = if (loading) View.VISIBLE else View.GONE
+        binding.progressBarEkyc.isVisible = loading
         binding.btnStartEkyc.isEnabled = !loading
+    }
+
+    private fun showToast(msg: String) {
+        Toast.makeText(this, msg, Toast.LENGTH_LONG).show()
     }
 }

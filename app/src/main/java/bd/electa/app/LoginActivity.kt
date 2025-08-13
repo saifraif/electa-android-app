@@ -1,80 +1,152 @@
 package bd.electa.app
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.View
+import android.widget.EditText
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import androidx.lifecycle.lifecycleScope
 import bd.electa.app.databinding.ActivityLoginBinding
-import bd.electa.app.models.AuthRequest
+import bd.electa.app.models.LoginRequest
 import bd.electa.app.networking.RetrofitClient
 import bd.electa.app.utils.SessionManager
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class LoginActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityLoginBinding
-    private lateinit var session: SessionManager
+    private lateinit var sessionManager: SessionManager
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityLoginBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        session = SessionManager(this)
+        sessionManager = SessionManager(this)
 
-        binding.loginButton.setOnClickListener {
-            val email = binding.emailEditText.text?.toString().orEmpty()
-            val password = binding.passwordEditText.text?.toString().orEmpty()
+        // If token already exists, go straight to Main
+        sessionManager.getAccessToken()?.let {
+            startActivity(Intent(this, MainActivity::class.java))
+            finish()
+            return
+        }
 
-            if (email.isBlank()) {
-                binding.emailInputLayout.error = "Email required"
+        binding.loginButton?.setOnClickListener {
+            val email = binding.emailEditText?.text?.toString()?.trim().orEmpty()
+            if (email.isEmpty()) {
+                Toast.makeText(this, "Please enter email", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
-            } else binding.emailInputLayout.error = null
-
-            if (password.isBlank()) {
-                binding.passwordInputLayout.error = "Password required"
-                return@setOnClickListener
-            } else binding.passwordInputLayout.error = null
-
-            doLogin(email, password)
+            }
+            requestOtp(email)
         }
     }
 
-    private fun doLogin(email: String, password: String) {
+    private fun requestOtp(email: String) {
         setLoading(true)
-        lifecycleScope.launch {
+        CoroutineScope(Dispatchers.IO).launch {
             try {
-                // demo flow: request OTP then verify with a hardcoded otp=1234
-                val req = AuthRequest(email, password)
-                val reqRes = RetrofitClient.api.requestOtp(req)
-                if (!reqRes.isSuccessful) {
-                    Toast.makeText(this@LoginActivity, "OTP request failed", Toast.LENGTH_SHORT).show()
-                    setLoading(false); return@launch
-                }
-                val verifyRes = RetrofitClient.api.verifyOtp(req, otp = 1234)
-                if (verifyRes.isSuccessful) {
-                    val token = verifyRes.body()?.accessToken
-                    if (!token.isNullOrBlank()) {
-                        session.setToken(token)
-                        Toast.makeText(this@LoginActivity, "Login success", Toast.LENGTH_SHORT).show()
-                        finish()
+                val resp = RetrofitClient.instance.requestOtp(LoginRequest(email = email))
+                withContext(Dispatchers.Main) {
+                    if (resp.isSuccessful) {
+                        Toast.makeText(
+                            this@LoginActivity,
+                            "OTP sent. Please check your email.",
+                            Toast.LENGTH_LONG
+                        ).show()
+                        promptAndVerify(email)
                     } else {
-                        Toast.makeText(this@LoginActivity, "No token received", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(
+                            this@LoginActivity,
+                            "Failed to send OTP: ${resp.code()}",
+                            Toast.LENGTH_LONG
+                        ).show()
                     }
-                } else {
-                    Toast.makeText(this@LoginActivity, "Verify failed: ${verifyRes.code()}", Toast.LENGTH_SHORT).show()
                 }
             } catch (e: Exception) {
-                Toast.makeText(this@LoginActivity, "Error: ${e.localizedMessage}", Toast.LENGTH_LONG).show()
+                withContext(Dispatchers.Main) {
+                    Toast.makeText(
+                        this@LoginActivity,
+                        "Network error: ${e.localizedMessage}",
+                        Toast.LENGTH_LONG
+                    ).show()
+                }
             } finally {
-                setLoading(false)
+                withContext(Dispatchers.Main) { setLoading(false) }
+            }
+        }
+    }
+
+    private fun promptAndVerify(email: String) {
+        val editText = EditText(this).apply {
+            inputType = android.text.InputType.TYPE_CLASS_NUMBER
+            hint = "Enter OTP"
+        }
+        AlertDialog.Builder(this)
+            .setTitle("Verify OTP")
+            .setView(editText)
+            .setPositiveButton("Verify") { dlg, _ ->
+                val otpText = editText.text?.toString()?.trim()
+                val otp = otpText?.toIntOrNull()
+                if (otp == null) {
+                    Toast.makeText(this, "Invalid OTP", Toast.LENGTH_SHORT).show()
+                } else {
+                    verifyOtp(email, otp)
+                }
+                dlg.dismiss()
+            }
+            .setNegativeButton("Cancel") { dlg, _ -> dlg.dismiss() }
+            .show()
+    }
+
+    private fun verifyOtp(email: String, otp: Int) {
+        setLoading(true)
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                val resp = RetrofitClient.instance.verifyOtp(LoginRequest(email = email), otp)
+                withContext(Dispatchers.Main) {
+                    if (resp.isSuccessful) {
+                        val body = resp.body()
+                        val token = body?.accessToken
+                        if (!token.isNullOrBlank()) {
+                            sessionManager.saveAccessToken(token)
+                            Toast.makeText(this@LoginActivity, "Logged in", Toast.LENGTH_SHORT).show()
+                            startActivity(Intent(this@LoginActivity, MainActivity::class.java))
+                            finish()
+                        } else {
+                            Toast.makeText(
+                                this@LoginActivity,
+                                "Empty token in response",
+                                Toast.LENGTH_LONG
+                            ).show()
+                        }
+                    } else {
+                        Toast.makeText(
+                            this@LoginActivity,
+                            "Verify failed: ${resp.code()}",
+                            Toast.LENGTH_LONG
+                        ).show()
+                    }
+                }
+            } catch (e: Exception) {
+                withContext(Dispatchers.Main) {
+                    Toast.makeText(
+                        this@LoginActivity,
+                        "Network error: ${e.localizedMessage}",
+                        Toast.LENGTH_LONG
+                    ).show()
+                }
+            } finally {
+                withContext(Dispatchers.Main) { setLoading(false) }
             }
         }
     }
 
     private fun setLoading(loading: Boolean) {
-        binding.progressBar.visibility = if (loading) View.VISIBLE else View.GONE
-        binding.loginButton.isEnabled = !loading
+        binding.progressBar?.visibility = if (loading) View.VISIBLE else View.GONE
+        binding.loginButton?.isEnabled = !loading
     }
 }

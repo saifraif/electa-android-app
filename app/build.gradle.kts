@@ -6,15 +6,14 @@ plugins {
 
 android {
     namespace = "bd.electa.app"
-    compileSdk = 36
+    compileSdk = 35
 
     defaultConfig {
         applicationId = "bd.electa.app"
-        minSdk = 24
+        minSdk = 26
         targetSdk = 36
         versionCode = 1
         versionName = "1.0"
-
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -38,7 +37,7 @@ android {
         targetCompatibility = JavaVersion.VERSION_17
     }
 
-    // New DSL (replaces deprecated kotlinOptions.jvmTarget)
+    // Modern Kotlin DSL for JVM target
     kotlin {
         compilerOptions {
             jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
@@ -51,7 +50,10 @@ android {
         buildConfig = true
     }
 }
+
 dependencies {
+    implementation(libs.androidx.browser)
+
     // AndroidX core UI
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
@@ -69,6 +71,7 @@ dependencies {
 
     // Networking / JSON
     implementation(libs.okhttp)
+    implementation(libs.okhttp.logging)
     implementation(libs.retrofit)
     implementation(libs.retrofit.converter.gson)
     implementation(libs.gson)

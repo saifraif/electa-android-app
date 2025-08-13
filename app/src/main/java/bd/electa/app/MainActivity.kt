@@ -9,19 +9,32 @@ import bd.electa.app.utils.SessionManager
 class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
-    private lateinit var session: SessionManager
+    private lateinit var sessionManager: SessionManager
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        session = SessionManager(this)
+        sessionManager = SessionManager(this)
 
-        // If your layout has buttons, wire them; otherwise just keep it simple.
-        // Example:
-        // binding.btnGoLogin.setOnClickListener { startActivity(Intent(this, LoginActivity::class.java)) }
-        // binding.btnGoCharter.setOnClickListener { startActivity(Intent(this, CharterActivity::class.java)) }
-        // binding.btnGoEkyc.setOnClickListener { startActivity(Intent(this, EkycActivity::class.java)) }
+        // Example wiring (use ?. to avoid crashes if IDs differ in your layout)
+        binding.btnOpenCharter?.setOnClickListener {
+            startActivity(Intent(this, CharterActivity::class.java))
+        }
+
+        binding.btnOpenEkyc?.setOnClickListener {
+            startActivity(Intent(this, EkycActivity::class.java))
+        }
+
+        binding.btnOpenLogin?.setOnClickListener {
+            startActivity(Intent(this, LoginActivity::class.java))
+        }
+
+        binding.btnLogout?.setOnClickListener {
+            sessionManager.clear()
+            startActivity(Intent(this, LoginActivity::class.java))
+            finish()
+        }
     }
 }
