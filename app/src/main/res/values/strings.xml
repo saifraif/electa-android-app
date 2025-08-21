@@ -1,0 +1,19 @@
+<resources>
+    <string name="app_name">electa-android-app</string>
+    <string name="e_kyc_verification">e-KYC Verification</string>
+    <string name="to_complete_your_verification_instantly_we_will_redirect_you_to_our_partner_bank_to_securely_verify_your_identity_your_data_will_be_handled_securely">To complete your verification instantly, we will redirect you to our partner bank to securely verify your identity. Your data will be handled securely.</string>
+    <string name="start_e_kyc_verification">Start e-KYC Verification</string>
+    <string name="mobile_number_e_g_880">Mobile Number (e.g., +880...)</string>
+    <string name="password">Password</string>
+    <string name="request_otp">Request OTP</string>
+    <string name="enter_6_digit_otp">Enter 6-digit OTP</string>
+    <string name="verify_amp_register"><![CDATA[Verify & Register]]></string>
+    <string name="or_try_instant_e_kyc_verification">Or, Try Instant e-KYC Verification</string>
+    <string name="july_charter_compliance">July Charter Compliance</string>
+    <string name="clause_1_0_anti_corruption">Clause 1.0 (Anti-Corruption)</string>
+    <string name="anti_corruption_pledge">Anti-Corruption Pledge</string>
+    <string name="app_logo">App Logo</string>
+    <string name="email">Email</string>
+    <string name="login">Login</string>
+    <string name="forgot_password">Forgot Password?</string>
+</resources>
