@@ -18,19 +18,27 @@ class MainActivity : AppCompatActivity() {
 
         sessionManager = SessionManager(this)
 
-        // Example wiring (use ?. to avoid crashes if IDs differ in your layout)
+        // Charter (public content)
         binding.btnOpenCharter?.setOnClickListener {
             startActivity(Intent(this, CharterActivity::class.java))
         }
 
+        // eKYC (optional for later)
         binding.btnOpenEkyc?.setOnClickListener {
             startActivity(Intent(this, EkycActivity::class.java))
         }
 
+        // Login (optional for later)
         binding.btnOpenLogin?.setOnClickListener {
             startActivity(Intent(this, LoginActivity::class.java))
         }
 
+        // NEW: guest browsing — open Parties list
+        binding.btnOpenPublicParties?.setOnClickListener {
+            startActivity(Intent(this, PublicPartiesActivity::class.java))
+        }
+
+        // Logout
         binding.btnLogout?.setOnClickListener {
             sessionManager.clear()
             startActivity(Intent(this, LoginActivity::class.java))

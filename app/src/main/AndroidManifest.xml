@@ -17,6 +17,7 @@
         android:usesCleartextTraffic="true">
         <activity
             android:name=".CharterActivity"
+        
             android:exported="false" />
         <activity
             android:name=".EkycActivity"
@@ -30,6 +31,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity android:name=".PublicPartiesActivity" />
     </application>
 
 </manifest>
